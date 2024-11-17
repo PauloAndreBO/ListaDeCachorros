@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela de Cachorros</title>
+   
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f9f9f9;
+    }
+    
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+    
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-container h2 {
+        margin-bottom: 15px;
+        color: #444;
+    }
+    
+    form input[type="text"],
+    form input[type="email"] {
+        width: calc(50% - 10px);
+        padding: 10px;
+        margin: 5px 5px 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    form button {
+        padding: 10px 20px;
+        background-color: #0B6121;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    form button:hover {
+        background-color: #0B6121;
+    }
+
+    table {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        border-collapse: collapse;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+    }
+    
+    th, td {
+        padding: 15px 20px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #f2f2f2;
+        color: #333;
+    }
+    
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    img {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    
+    button {
+        padding: 10px 12px;
+        margin: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    
+    button:hover {
+        opacity: 0.9;
+    }
+    
+    button[onclick="editDog(this)"] {
+        background-color: #0431B4;
+        color: white;
+    }
+    
+    button[onclick="deleteDog(this)"] {
+        background-color: #8A0808;
+        color: white;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #addDogButton {
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #0B6121;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        display: block;
+        margin-left: 350px;
+    }
+
+    #addDogButton:hover {
+        background-color: #45a049;
+
+
+    }
+   
+    </style>
+</head>
+<body>
+
+    <h1>Lista de Cachorros</h1>
+
+    <!-- Botão para abrir o modal -->
+    <button id="addDogButton">Adicionar Cachorro</button>
+
+    <!-- O Modal -->
+    <div id="dogModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Adicionar Cachorro</h2>
+            <form id="dogForm">
+                <input type="text" id="cachorro" placeholder="Nome do Cachorro" required>
+                <input type="text" id="dono" placeholder="Nome do Dono" required>
+                <input type="text" id="telefone" placeholder="Telefone" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <button type="submit">Adicionar</button>
+            </form>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Imagem</th>
+                <th>Nome do Cachorro</th>
+                <th>Nome do Dono</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="dogTableBody">
+            <!-- Os dados serão preenchidos aqui -->
+        </tbody>
+    </table>
+
+    <script>
+        const dogTableBody = document.getElementById('dogTableBody');
+        const modal = document.getElementById("dogModal");
+        const btn = document.getElementById("addDogButton");
+        const span = document.getElementsByClassName("close")[0];
+
+        // Abrir o modal
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Fechar o modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Fechar o modal se o usuário clicar fora do conteúdo
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Função para buscar dados da API e preencher a tabela
+        async function loadDogsFromAPI() {
+            try {
+                const response = await fetch('https://run.mocky.io/v3/f89613e9-4e93-45d7-99f5-db5fe11d2202');
+                const data = await response.json();
+                
+                console.log(data); // Adiciona esse log para verificar a estrutura dos dados
+                
+                data.forEach(dog => {
+                    addDogToTable(dog.cachorro, dog.dono, dog.telefone, dog.email);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar dados da API:', error);
+            }
+        }
+
+        // Função para adicionar um cachorro
+        document.getElementById('dogForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita o envio do formulário
+
+            const cachorro = document.getElementById('cachorro').value;
+            const dono = document.getElementById('dono').value;
+            const telefone = document.getElementById('telefone').value;
+            const email = document.getElementById('email').value;
+
+            addDogToTable(cachorro, dono, telefone, email);
+
+            // Limpa os campos do formulário
+            this.reset();
+            modal.style.display = "none"; // Fecha o modal após adicionar
+        });
+
+        function addDogToTable(cachorro, dono, telefone, email) {
+            const row = document.createElement('tr');
+            const randomImageNumber = Math.floor(Math.random() * 1000); // Gera um número aleatório para a imagem
+            row.innerHTML = `
+                <td><img src="https://placedog.net/100/100?random=${randomImageNumber}" alt="Cachorro"></td>
+                <td contenteditable="false">${cachorro}</td>
+                <td contenteditable="false">${dono}</td>
+                <td contenteditable="false">${telefone}</td>
+                <td contenteditable="false">${email}</td>
+                <td>
+                    <button onclick="editDog(this)">Editar</button>
+                    <button onclick="deleteDog(this)">Excluir</button>
+                </td>
+            `;
+            dogTableBody.appendChild(row);
+        }
+
+        function deleteDog(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+
+        function editDog(button) {
+            const row = button.closest('tr');
+            const cells = row.getElementsByTagName('td');
+            const name = cells[1].textContent;
+            const owner = cells[2].textContent;
+            const phone = cells[3].textContent;
+            const email = cells[4].textContent;
+            
+            document.getElementById('cachorro').value = name;
+            document.getElementById('dono').value = owner;
+            document.getElementById('telefone').value = phone;
+            document.getElementById('email').value = email;
+            
+            modal.style.display = "block";
+        }
+
+        // Carrega os cachorros da API ao carregar a página
+        window.onload = loadDogsFromAPI;
+    </script>
+
+</body>
+</html>
